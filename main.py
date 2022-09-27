@@ -2,6 +2,7 @@ import pygame
 from checkers.constants import BLACK, WIDTH, HEIGHT, SQUARE_SIZE
 from checkers.board import Board
 from checkers.game import Game
+import pyautogui
 
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 
@@ -27,9 +28,12 @@ def main():
         clock.tick(FPS)
 
         if game.winner() != None:
-            print(game.winner())
+            if game.winner() == BLACK:
+                pyautogui.alert("Gano el jugador: NEGRO")
+            else:
+                pyautogui.alert("Gano el jugador: BLANCO")
             run = False
-            
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False

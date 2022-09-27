@@ -17,4 +17,5 @@ del oponente.
 
 ## Dependencias
     pip install pygame
+    pip install pyautogui
 

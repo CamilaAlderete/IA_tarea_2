@@ -16,6 +16,11 @@ class Board:
             for col in range(row % 2, ROWS, 2):
                 pygame.draw.rect(win, MARRON, (row*SQUARE_SIZE, col*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
+    # funcion de evaluacion
+    # Incentiva a obtener reyes
+    def evaluate(self):
+        return self.white_left - self.red_left + (self.white_kings * 0.5 - self.red_kings * 0.5)
+
     def move(self, piece, row, col):
         # La pieza en la posicion actual se invierten (swap)
         self.board[piece.row][piece.col], self.board[row][col] = self.board[row][col], self.board[piece.row][piece.col]

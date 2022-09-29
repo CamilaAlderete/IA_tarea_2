@@ -71,3 +71,10 @@ class Game:
             self.turn = BLACK
             print("Turno del negro")
     
+    def get_board(self):
+        return self.board
+        
+    #retorna un nuevo tablero con la jugada de la ia
+    def ai_move(self, board):
+        self.board = board
+        self.change_turn()

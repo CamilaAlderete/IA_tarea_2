@@ -163,3 +163,29 @@ class Board:
                 last = [current]
             right += 1
         return moves
+
+
+    def has_valid_moves(self, color):
+
+        #Verifica si tiene movimientos validos que puede realizar un color.
+
+        valid_moves = False
+
+        for row in range(ROWS):
+            for col in range(COLS):
+
+                piece = self.board[row][col]
+                if piece != 0:
+
+                    if piece.color == color:
+
+                        moves = len(self.get_valid_moves(piece))
+
+                        if moves != 0:
+                            valid_moves = True
+                            break
+
+        return valid_moves
+
+    def remaining_pieces(self):
+        return { "black": self.red_left, "white": self.white_left}

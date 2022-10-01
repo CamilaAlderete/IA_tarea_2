@@ -3,7 +3,7 @@ from checkers.constants import BLACK, WIDTH, HEIGHT, SQUARE_SIZE, WHITE
 from checkers.board import Board
 from checkers.game import Game
 import pyautogui
-from minimax.algorithm import minimax
+from minimax.algorithm import minimax, minimax_alpha_beta_poda
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 
 pygame.display.set_caption('Damas')
@@ -29,7 +29,8 @@ def main():
 
         if game.turn == WHITE:
             # El numero indica que tan profundo buscara en el arbol para tomar una decision
-            value, new_board = minimax(game.get_board(), 4, WHITE, game)
+            #value, new_board = minimax(game.get_board(), 4, WHITE, game)
+            value, new_board = minimax_alpha_beta_poda(game.get_board(), 4, float('-inf'), float('inf'), WHITE, game)
             game.ai_move(new_board)
         else:
             game.update()
@@ -39,7 +40,7 @@ def main():
             else:
                 pyautogui.alert("Gano el jugador: BLANCO")
             run = False
-
+            
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False

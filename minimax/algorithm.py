@@ -52,3 +52,35 @@ def minimax(position, depth, max_player, game):
             if min_eval == evaluation:
                 best_move = move
         return min_eval, best_move
+
+# alpha beta pruning
+def minimax_alpha_beta_poda(position, depth, alpha, beta, max_player, game):
+    if depth == 0 or position.winner() != None:
+        return position.evaluate(), position
+    # Si es el turno de la maquina
+    if max_player:
+        max_eval = float('-inf')
+        best_move = None
+        # Recorrer todas las jugadas posibles
+        for move in get_all_moves(position, WHITE, game):
+            # Hacer la jugada
+            evaluation = minimax_alpha_beta_poda(move, depth - 1, alpha, beta, False, game)[0]
+            max_eval = max(max_eval, evaluation)
+            alpha = max(alpha, evaluation)
+            if max_eval == evaluation:
+                best_move = move
+            if beta <= alpha:
+                break
+        return max_eval, best_move
+    else:
+        min_eval = float('inf')
+        best_move = None
+        for move in get_all_moves(position, BLACK, game):
+            evaluation = minimax_alpha_beta_poda(move, depth - 1, alpha, beta, True, game)[0]
+            min_eval = min(min_eval, evaluation)
+            beta = min(beta, evaluation)
+            if min_eval == evaluation:
+                best_move = move
+            if beta <= alpha:
+                break
+        return min_eval, best_move

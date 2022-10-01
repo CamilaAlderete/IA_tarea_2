@@ -124,10 +124,14 @@ class Board:
                 if last:
                     if step == -1:
                         row = max(r - 3, 0)
+                        # evitar bug en piezas negras
+                        if row == 0:
+                            row = - 1
+
                     else:
                         row = min(r + 3, ROWS)
-                    moves.update(self._traverse_left(r + step, row, step, color, left - 1, skipped=last))
-                    moves.update(self._traverse_right(r + step, row, step, color, left + 1, skipped=last))
+                    moves.update(self._traverse_left(r + step, row, step, color, left - 1, skipped=last + skipped))
+                    moves.update(self._traverse_right(r + step, row, step, color, left + 1, skipped=last + skipped))
                 break
             # si tiene el mismo color no se puede avanzar
             elif current.color == color:
@@ -154,10 +158,14 @@ class Board:
                 if last:
                     if step == -1:
                         row = max(r - 3, 0)
+                        # evitar bug en piezas negras
+                        if row == 0:
+                            row = - 1
+
                     else:
                         row = min(r + 3, ROWS)
-                    moves.update(self._traverse_left(r + step, row, step, color, right - 1, skipped=last))
-                    moves.update(self._traverse_right(r + step, row, step, color, right + 1, skipped=last))
+                    moves.update(self._traverse_left(r + step, row, step, color, right - 1, skipped=last + skipped))
+                    moves.update(self._traverse_right(r + step, row, step, color, right + 1, skipped=last + skipped))
                 break
             elif current.color == color:
                 break
@@ -165,3 +173,29 @@ class Board:
                 last = [current]
             right += 1
         return moves
+
+
+    def has_valid_moves(self, color):
+
+        #Verifica si tiene movimientos validos que puede realizar un color.
+
+        valid_moves = False
+
+        for row in range(ROWS):
+            for col in range(COLS):
+
+                piece = self.board[row][col]
+                if piece != 0:
+
+                    if piece.color == color:
+
+                        moves = len(self.get_valid_moves(piece))
+
+                        if moves != 0:
+                            valid_moves = True
+                            break
+
+        return valid_moves
+
+    def remaining_pieces(self):
+        return { "black": self.red_left, "white": self.white_left}

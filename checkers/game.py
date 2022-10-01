@@ -17,9 +17,11 @@ class Game:
         self.board = Board()
         self.turn = BLACK
         self.valid_moves = {}
+        self.white_valid_moves = True
+        self.black_valid_moves = True
 
-    def winner(self):
-        return self.board.winner()
+    # def winner(self):
+    #     return self.board.winner()
 
     def reset(self):
        self._init()
@@ -66,15 +68,34 @@ class Game:
         self.valid_moves = {}
         if self.turn == BLACK:
             self.turn = WHITE
+            self.white_valid_moves = self.board.has_valid_moves(WHITE)
             print("Turno del blanco")
         else:
             self.turn = BLACK
+            self.black_valid_moves = self.board.has_valid_moves(BLACK)
             print("Turno del negro")
-    
+
     def get_board(self):
         return self.board
-        
+
     #retorna un nuevo tablero con la jugada de la ia
     def ai_move(self, board):
         self.board = board
         self.change_turn()
+
+
+    def winner(self):
+
+        """
+        Metodo que verifica la cantidad de piezas restantes y si tiene movimientos validos
+        para determinar el color ganador
+        """
+        remaining_pieces = self.board.remaining_pieces()
+        if self.turn == WHITE:
+            if remaining_pieces["white"] == 0 or self.white_valid_moves is False:
+                return BLACK
+
+        else:
+            if remaining_pieces["black"] == 0 or self.black_valid_moves is False:
+                return WHITE
+

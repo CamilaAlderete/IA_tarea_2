@@ -29,7 +29,7 @@ def get_all_moves(board, color, game):
 # nuestra posicion en el tablero, la profundidad del arbol y el jugador
 # Si max es true, es el turno de la maquina
 def minimax(position, depth, max_player, game):
-    if depth == 0 or position.winner() != None:
+    if depth == 0 or game.winner() is not None:
         return position.evaluate(), position
     # Si es el turno de la maquina
     if max_player:
@@ -55,7 +55,8 @@ def minimax(position, depth, max_player, game):
 
 # alpha beta pruning
 def minimax_alpha_beta_poda(position, depth, alpha, beta, max_player, game):
-    if depth == 0 or position.winner() != None:
+
+    if depth == 0 or game.winner() is not None:
         return position.evaluate(), position
     # Si es el turno de la maquina
     if max_player:

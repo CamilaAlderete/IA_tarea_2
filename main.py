@@ -27,16 +27,17 @@ def main():
     while run:
         clock.tick(FPS)
 
-        if game.turn == WHITE:
-            # El numero indica que tan profundo buscara en el arbol para tomar una decision
-            #value, new_board = minim0ax(game.get_board(), 4, WHITE, game)
-            value, new_board = minimax_alpha_beta_poda(game.get_board(), 4, float('-inf'), float('inf'), WHITE, game)
-            game.ai_move(new_board)
-        else:
-            game.update()
-
         winner = game.winner()
-        if winner is not None:
+
+        if winner is None:
+            if game.turn == WHITE:
+                # El numero indica que tan profundo buscara en el arbol para tomar una decision
+                #value, new_board = minim0ax(game.get_board(), 4, WHITE, game)
+                value, new_board = minimax_alpha_beta_poda(game.get_board(), 4, float('-inf'), float('inf'), WHITE, game)
+                game.ai_move(new_board)
+            else:
+                game.update()
+        else:
             if winner == BLACK:
                 pyautogui.alert("Gano el jugador: NEGRO")
             elif winner == WHITE:

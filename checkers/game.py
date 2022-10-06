@@ -19,6 +19,7 @@ class Game:
         self.valid_moves = {}
         self.white_valid_moves = True
         self.black_valid_moves = True
+        self.movimientos_sin_captura = 0
 
     # def winner(self):
     #     return self.board.winner()
@@ -51,8 +52,13 @@ class Game:
             #mover la pieza seleccionada a la fila y columna
             self.board.move(self.selected, row, col)
             skipped = self.valid_moves[(row, col)]
+
             if skipped:
                 self.board.remove(skipped)
+                self.movimientos_sin_captura = 0
+            else:
+                self.movimientos_sin_captura = self.movimientos_sin_captura + 1
+
             self.change_turn()
         else:
             return False
@@ -90,12 +96,40 @@ class Game:
         Metodo que verifica la cantidad de piezas restantes y si tiene movimientos validos
         para determinar el color ganador
         """
+
+        if self.movimientos_sin_captura == 40:
+            return 'Empate'
+
         remaining_pieces = self.board.remaining_pieces()
         if self.turn == WHITE:
-            if remaining_pieces["white"] == 0 or self.white_valid_moves is False:
+
+            if remaining_pieces["white"] == 0:
                 return BLACK
 
+            if self.white_valid_moves is False:
+
+                self.black_valid_moves = self.board.has_valid_moves(BLACK)
+
+                #blancas sin movimientos validos pero las negras si tienen, ganan las negras
+                if self.black_valid_moves is True:
+                    return BLACK
+
+                #blanco ni negro con movimientos validos, empate
+                else:
+                    return 'Empate'
+
         else:
-            if remaining_pieces["black"] == 0 or self.black_valid_moves is False:
+            if remaining_pieces["black"] == 0:
                 return WHITE
 
+            if self.black_valid_moves is False:
+
+                self.white_valid_moves = self.board.has_valid_moves(WHITE)
+
+                # negras sin movimientos validos pero las blancas si tienen, ganan las blancas
+                if self.white_valid_moves is True:
+                    return WHITE
+
+                # blanco ni negro con movimientos validos, empate
+                else:
+                    return 'Empate'

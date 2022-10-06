@@ -1,5 +1,5 @@
 import pygame
-from checkers.constants import BLACK, WIDTH, HEIGHT, SQUARE_SIZE, WHITE
+from checkers.constants import BLACK,WHITE, WIDTH, HEIGHT, SQUARE_SIZE
 from checkers.board import Board
 from checkers.game import Game
 import pyautogui
@@ -29,16 +29,21 @@ def main():
 
         if game.turn == WHITE:
             # El numero indica que tan profundo buscara en el arbol para tomar una decision
-            #value, new_board = minimax(game.get_board(), 4, WHITE, game)
+            #value, new_board = minim0ax(game.get_board(), 4, WHITE, game)
             value, new_board = minimax_alpha_beta_poda(game.get_board(), 4, float('-inf'), float('inf'), WHITE, game)
             game.ai_move(new_board)
         else:
             game.update()
-        if game.winner() != None:
-            if game.winner() == BLACK:
+
+        winner = game.winner()
+        if winner is not None:
+            if winner == BLACK:
                 pyautogui.alert("Gano el jugador: NEGRO")
-            else:
+            elif winner == WHITE:
                 pyautogui.alert("Gano el jugador: BLANCO")
+            else:
+                pyautogui.alert("Empate")
+
             run = False
             
         for event in pygame.event.get():

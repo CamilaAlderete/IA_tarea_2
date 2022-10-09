@@ -1,0 +1,28 @@
+
+poda vs poda
+
+            if game.turn == WHITE:
+                value, new_board = minimax_alpha_beta_poda(game.get_board(), 1, float('-inf'), float('inf'), WHITE, WHITE, game)
+                game.ai_move(new_board)
+            else:
+                value2, new_board2 = minimax_alpha_beta_poda(game.get_board(), 4, float('-inf'), float('inf'), BLACK, BLACK, game)
+                game.ai_move(new_board2)
+
+
+poda vs humano
+
+            if game.turn == WHITE:
+                value, new_board = minimax_alpha_beta_poda(game.get_board(), 1, float('-inf'), float('inf'), WHITE, WHITE, game)
+                game.ai_move(new_board)
+            else:
+                game.update()
+
+
+
+minimax vs humano
+
+            if game.turn == WHITE:
+                value, new_board = minimax(game.get_board(), 4, WHITE, game)
+                game.ai_move(new_board)
+            else:
+                game.update()

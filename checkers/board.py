@@ -1,6 +1,7 @@
 import pygame
 from .constants import CAFE, MARRON, ROWS, SQUARE_SIZE, BLACK, WHITE, COLS
 from .piece import Piece
+import random
 class Board:
     def __init__(self):
         self.board = []
@@ -18,8 +19,14 @@ class Board:
 
     # funcion de evaluacion
     # Incentiva a obtener reyes
-    def evaluate(self):
-        return self.white_left - self.red_left + (self.white_kings * 0.5 - self.red_kings * 0.5)
+    #HEURISTICA
+    def evaluate(self, color):
+
+        if color == WHITE:
+            return self.white_left - self.red_left + 0.5*(self.white_kings - self.red_kings)
+        else:
+            return self.red_left - self.white_left + 0.5*(self.red_kings - self.white_kings)
+
 
     # Dado el color 
     def get_all_pieces(self, color):
@@ -28,8 +35,9 @@ class Board:
             for piece in row:
                 if piece != 0 and piece.color == color:
                     pieces.append(piece)
+
+        random.shuffle(pieces) #importante para evitar bug de solo querer conorar y atascarse
         return pieces
-    
 
     def move(self, piece, row, col):
         # La pieza en la posicion actual se invierten (swap)

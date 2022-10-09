@@ -28,7 +28,9 @@ def main():
 
         if winner is None:
 
-            ai_vs_ai(game)
+            #ai_vs_ai(game)
+            #minimax_vs_minimax(game)
+            minimax_vs_prunnig(game)
 
         else:
             if winner == BLACK:
@@ -73,6 +75,27 @@ def ai_vs_ai(game):
         game.ai_move(new_board)
     else:
         value2, new_board2 = minimax_alpha_beta_prunning(game.get_board(), 4, float('-inf'), float('inf'), True, BLACK, game)
+        game.ai_move(new_board2)
+
+
+def minimax_vs_prunnig(game):
+
+    if game.turn == WHITE:
+        value, new_board = minimax_alpha_beta_prunning(game.get_board(), 4, float('-inf'), float('inf'), True, WHITE, game)
+        game.ai_move(new_board)
+    else:
+        value2, new_board2 = minimax(game.get_board(), 3, True, BLACK, game)
+        game.ai_move(new_board2)
+
+
+
+def minimax_vs_minimax(game):
+
+    if game.turn == WHITE:
+        value, new_board = minimax(game.get_board(), 4, True, WHITE, game)
+        game.ai_move(new_board)
+    else:
+        value2, new_board2 = minimax(game.get_board(), 3, True, BLACK, game)
         game.ai_move(new_board2)
 
 

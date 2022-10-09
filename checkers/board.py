@@ -36,7 +36,7 @@ class Board:
                 if piece != 0 and piece.color == color:
                     pieces.append(piece)
 
-        random.shuffle(pieces) #importante para evitar bug de solo querer conorar y atascarse
+        #random.shuffle(pieces) #importante para evitar bug de solo querer conorar y atascarse
         return pieces
 
     def move(self, piece, row, col):

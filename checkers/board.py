@@ -23,9 +23,9 @@ class Board:
     def evaluate(self, color):
 
         if color == WHITE:
-            return self.white_left - self.red_left + 0.5*(self.white_kings - self.red_kings)
+            return self.white_left - self.red_left# + 0.5*(self.white_kings - self.red_kings)
         else:
-            return self.red_left - self.white_left + 0.5*(self.red_kings - self.white_kings)
+            return self.red_left - self.white_left# + 0.5*(self.red_kings - self.white_kings)
 
 
     # Dado el color 
@@ -36,7 +36,7 @@ class Board:
                 if piece != 0 and piece.color == color:
                     pieces.append(piece)
 
-        #random.shuffle(pieces) #importante para evitar bug de solo querer conorar y atascarse
+        random.shuffle(pieces) #importante para evitar bug de solo querer conorar y atascarse
         return pieces
 
     def move(self, piece, row, col):

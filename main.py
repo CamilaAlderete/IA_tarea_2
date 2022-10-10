@@ -28,7 +28,7 @@ def main():
 
         if winner is None:
 
-            #ai_vs_ai(game)
+            #prunning_vs_prunning(game)
             #minimax_vs_minimax(game)
             minimax_vs_prunnig(game)
 
@@ -63,28 +63,28 @@ def human_vs_ai(game):
     if game.turn == WHITE:
         # El numero indica que tan profundo buscara en el arbol para tomar una decision
         # value, new_board = minim0ax(game.get_board(), 4, WHITE, game)
-        value, new_board = minimax_alpha_beta_prunning(game.get_board(), 4, float('-inf'), float('inf'), True, WHITE, game)
+        value, new_board = minimax_alpha_beta_prunning(game.get_board(), 4, float('-inf'), float('inf'), True, WHITE, WHITE, game)
         game.ai_move(new_board)
     else:
         game.update()
 
-def ai_vs_ai(game):
+def prunning_vs_prunning(game):
 
     if game.turn == WHITE:
-        value, new_board = minimax_alpha_beta_prunning(game.get_board(), 2, float('-inf'), float('inf'), True, WHITE, game)
+        value, new_board = minimax_alpha_beta_prunning(game.get_board(), 3, float('-inf'), float('inf'), True, WHITE, WHITE, game)
         game.ai_move(new_board)
     else:
-        value2, new_board2 = minimax_alpha_beta_prunning(game.get_board(), 4, float('-inf'), float('inf'), True, BLACK, game)
+        value2, new_board2 = minimax_alpha_beta_prunning(game.get_board(), 2, float('-inf'), float('inf'), True, BLACK, BLACK, game)
         game.ai_move(new_board2)
 
 
 def minimax_vs_prunnig(game):
 
     if game.turn == WHITE:
-        value, new_board = minimax_alpha_beta_prunning(game.get_board(), 4, float('-inf'), float('inf'), True, WHITE, game)
+        value, new_board = minimax_alpha_beta_prunning(game.get_board(), 4, float('-inf'), float('inf'), True, WHITE, WHITE, game)
         game.ai_move(new_board)
     else:
-        value2, new_board2 = minimax(game.get_board(), 3, True, BLACK, game)
+        value2, new_board2 = minimax(game.get_board(), 3, True, BLACK, BLACK, game)
         game.ai_move(new_board2)
 
 
@@ -92,11 +92,16 @@ def minimax_vs_prunnig(game):
 def minimax_vs_minimax(game):
 
     if game.turn == WHITE:
-        value, new_board = minimax(game.get_board(), 4, True, WHITE, game)
+        value, new_board = minimax(game.get_board(), 2, True, WHITE, WHITE, game)
         game.ai_move(new_board)
+
+
     else:
-        value2, new_board2 = minimax(game.get_board(), 3, True, BLACK, game)
+        value2, new_board2 = minimax(game.get_board(), 3, True, BLACK, BLACK, game)
         game.ai_move(new_board2)
+
+
+
 
 
 main()

@@ -10,7 +10,7 @@ class Board:
         #Tenemos 0 reyes blancos y 0 reyes rojos(NEGROS)
         self.red_kings = self.white_kings = 0
         self.create_board()
-    
+
     def draw_squares(self, win):
         win.fill(CAFE)
         for row in range(ROWS):
@@ -207,3 +207,15 @@ class Board:
 
     def remaining_pieces(self):
         return { "black": self.red_left, "white": self.white_left}
+
+    def board_prueba(self):
+
+        #board para probar el empate
+
+        for row in range(ROWS):
+            self.board.append([])
+            for col in range(ROWS):
+                self.board[row].append(0)
+
+        self.board[0][0] = Piece(0, 0, WHITE)
+        self.board[7][7] = Piece(7, 7, BLACK)

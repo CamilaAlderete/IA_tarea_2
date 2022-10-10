@@ -57,7 +57,7 @@ class Game:
                 self.board.remove(skipped)
                 self.movimientos_sin_captura = 0
             else:
-                self.movimientos_sin_captura = self.movimientos_sin_captura + 1
+                self.movimientos_sin_captura += 1
 
             self.change_turn()
         else:
@@ -86,6 +86,7 @@ class Game:
 
     #retorna un nuevo tablero con la jugada de la ia
     def ai_move(self, board):
+        self.difference(board)
         self.board = board
         self.change_turn()
 
@@ -97,7 +98,7 @@ class Game:
         para determinar el color ganador
         """
 
-        if self.movimientos_sin_captura == 40:
+        if self.movimientos_sin_captura == 100:
             return 'Empate'
 
         remaining_pieces = self.board.remaining_pieces()
@@ -133,3 +134,14 @@ class Game:
                 # blanco ni negro con movimientos validos, empate
                 else:
                     return 'Empate'
+
+
+    def difference(self, new_board):
+
+        diff_white = new_board.white_left - self.get_board().white_left
+        diff_black = new_board.red_left - self.get_board().red_left
+
+        if diff_white < 0 or diff_black < 0:
+            self.movimientos_sin_captura = 0
+        else:
+            self.movimientos_sin_captura += 1

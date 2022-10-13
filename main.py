@@ -5,6 +5,7 @@ from checkers.game import Game
 import pyautogui
 from minimax.algorithm import minimax, minimax_alpha_beta_prunning
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+from checkers.window import Window
 
 pygame.display.set_caption('Damas')
 
@@ -21,8 +22,9 @@ def main():
     run = True
     FPS = 60
     clock = pygame.time.Clock()
-    game = Game(WIN)
-    rl = RL(BLACK, game,1)
+    window = Window(WIN)
+    game = window.game
+
 
     while run:
         clock.tick(FPS)
@@ -31,15 +33,15 @@ def main():
 
         if winner is None:
 
-            #prunning_vs_prunning(game)
-            #minimax_vs_minimax(game)
-            #minimax_vs_prunnig(game)
+            #prunning_vs_prunning(window.game)
+            #minimax_vs_minimax(window.game)
+            #minimax_vs_prunnig(window.game)
             if game.turn == WHITE:
                 # El numero indica que tan profundo buscara en el arbol para tomar una decision
                 # value, new_board = minim0ax(game.get_board(), 4, WHITE, game)
-                game.update()
+                window.update()
             else:
-                game.update()
+                window.update()
 
         else:
             if winner == BLACK:
@@ -60,10 +62,8 @@ def main():
                 row, col = get_row_col_from_mouse(pos)
                 game.select(row, col)
 
-        game.update()
+        window.update()
     pygame.quit()
-
-    #rl.store_dict()
 
 
 def human_vs_human():

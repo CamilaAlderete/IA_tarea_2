@@ -11,21 +11,14 @@ class Board:
         self.red_kings = self.white_kings = 0
         self.create_board()
 
-    def draw_squares(self, win):
-        win.fill(CAFE)
-        for row in range(ROWS):
-            for col in range(row % 2, ROWS, 2):
-                pygame.draw.rect(win, MARRON, (row*SQUARE_SIZE, col*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
-    # funcion de evaluacion
-    # Incentiva a obtener reyes
     #HEURISTICA
     def evaluate(self, color):
 
         if color == WHITE:
-            return self.white_left - self.red_left# + 0.5*(self.white_kings - self.red_kings)
+            return self.white_left - self.red_left
         else:
-            return self.red_left - self.white_left# + 0.5*(self.red_kings - self.white_kings)
+            return self.red_left - self.white_left
 
 
     # Dado el color 
@@ -70,14 +63,6 @@ class Board:
                         self.board[row].append(0)
                 else:
                     self.board[row].append(0)
-    
-    def draw(self, win):
-        self.draw_squares(win)
-        for row in range(ROWS):
-            for col in range(COLS):
-                piece = self.board[row][col]
-                if piece != 0:
-                    piece.draw(win)
 
     def remove(self, pieces):
         for piece in pieces:
@@ -87,13 +72,6 @@ class Board:
                     self.white_left -= 1
                 else:
                     self.red_left -= 1
-    
-    # def winner(self):
-    #     if self.red_left <= 0:
-    #         return WHITE
-    #     elif self.white_left <= 0:
-    #         return BLACK
-    #     return None
 
     def get_valid_moves(self, piece):
         moves = {}

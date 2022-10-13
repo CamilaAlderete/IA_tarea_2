@@ -2,3 +2,4 @@ venv
 checkers/__pycache__
 .idea
 minimax/__pycache__
+reinforcement_learning/__pycache__

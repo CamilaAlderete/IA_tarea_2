@@ -219,3 +219,27 @@ class Board:
 
         self.board[0][0] = Piece(0, 0, WHITE)
         self.board[7][7] = Piece(7, 7, BLACK)
+
+
+    def set_new_board(self, board):
+
+        self.board = board
+        self.white_left = self.red_left = 0
+        self.white_kings = self.red_kings = 0
+
+        for row in range(ROWS):
+            for col in range(COLS):
+
+                piece = self.board[row][col]
+                if piece != 0:
+
+                    if piece.color == WHITE:
+                        self.white_left += 1
+                        if piece.king == True:
+                            self.white_kings += 1
+
+                    if piece.color == BLACK:
+                        self.red_left += 1
+                        if piece.king == True:
+                            self.red_kings += 1
+

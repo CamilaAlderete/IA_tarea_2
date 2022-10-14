@@ -6,9 +6,14 @@ import pyautogui
 from minimax.algorithm import minimax, minimax_alpha_beta_prunning
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 from checkers.window import Window
-
 pygame.display.set_caption('Entrenamiento Damas')
 from reinforcement_learning.RL import RL
+import pickle
+import time
+
+
+FPS = 60
+
 
 # Obtener la fila y columna de la posicion del mouse
 def get_row_col_from_mouse(pos):
@@ -19,25 +24,29 @@ def get_row_col_from_mouse(pos):
 
 def main():
 
-    game = Game(WIN)
-    rl = RL(BLACK, 1)
-    rl.training = True
+    window = Window(WIN)
+    game = window.game
+    q_rate_list = [0.8]
 
-    for i in range(len(rl.q_rate_list)):
 
-        rl.set_q_rate(rl.q_rate_list[i])
+    for i in range(len(q_rate_list)):
+
+        agente = RL(game, BLACK)
+        agente.set_q_rate(q_rate_list[i])
+        agente.training = True
+        agente.load_dict()
+
 
         for j in range(1):
 
             # entrenamiento adversarial
-            rl.set_N(1)
+            agente.set_N(10000)
 
-            for k in range(rl.N):
+            for k in range(agente.N):
+                agente.update_alpha(k)
+                start_game(agente, window)
+                agente.reset()
 
-                #rl.reset()
-                rl.game = game
-                rl.update_alpha(k)
-                start_game(rl)
 
             # entrenamiento contra humano
             # rl.set_N(1)
@@ -46,45 +55,68 @@ def main():
                 # self.update_alpha(i)
                 # jugar
 
-
-        # rl.set_N(1)
-        # rl.training = False
-        # for j in range(rl.N):
-        #     start_game(rl)
+        if agente.training:
+            agente.store_dict()
 
 
-def start_game(rl):
-    run = True
-    FPS = 60
-    clock = pygame.time.Clock()
+def validate():
+
     window = Window(WIN)
     game = window.game
+    q_rate_list = [0.8]
 
-    rl.set_game(game)
-    rl.load_dict()
+    for i in range(len(q_rate_list)):
 
+        agente = RL(game, BLACK)
+        agente.set_q_rate(q_rate_list[i])
+        agente.training = False
+        agente.load_dict()
+        wins = draws = losses = 0
+
+        for j in range(1):
+
+            agente.set_N(3)
+
+            for k in range(agente.N):
+
+                result = start_game(agente, window)
+
+                if result == BLACK:
+                    wins += 1
+                elif result == WHITE:
+                    losses += 1
+                else:
+                    draws += 1
+
+                agente.reset()
+
+    agente.store_validation_results(wins,draws, losses, agente.N)
+
+
+def start_game(agente, window):
+
+    run = True
+    clock = pygame.time.Clock()
+    game = window.game
 
     while run:
-        clock.tick(FPS)
 
+        clock.tick(FPS)
         winner = game.winner()
 
         if winner is None:
 
             if game.turn == BLACK:
-                rl.play()
+                agente.play()
             else:
                 value2, new_board2 = minimax_alpha_beta_prunning(game.get_board(), 2, float('-inf'), float('inf'), True, WHITE, WHITE, game)
                 game.ai_move(new_board2)
         else:
-            # if winner == BLACK:
-            #     pyautogui.alert("Gano el jugador: NEGRO")
-            # elif winner == WHITE:
-            #     pyautogui.alert("Gano el jugador: BLANCO")
-            # else:
-            #     pyautogui.alert("Empate")
 
-            rl.store_dict()
+            agente.finish(winner)
+            if not agente.training:
+                return winner
+
             run = False
 
         for event in pygame.event.get():
@@ -100,4 +132,42 @@ def start_game(rl):
 
     #pygame.quit()
 
-main()
+
+def watch_dict():
+
+    window = Window(WIN)
+    game = window.game
+    agente = RL(game, BLACK)
+    clock = pygame.time.Clock()
+    agente = RL(game, BLACK)
+
+    try:
+        # if self.player_color == WHITE:
+        #     file = open('white_table.pkl', 'rb')
+        # else:
+        #     file = open('black_table.pkl', 'rb')
+        file = open('learning_table.pkl', 'rb')
+        dict = pickle.load(file)
+        suma = 0
+
+        for key in dict:
+            if dict[key] == 1.0:
+                clock.tick(FPS)
+
+                game.board.board = agente.deserialize_board(key)
+                window.update()
+                time.sleep(3)
+                suma += 1
+                if suma == 20:
+                    break
+
+        print(suma)
+
+        file.close()
+    except:
+        print('No se pudo cargar la tabla de aprendizaje')
+
+
+#main()
+watch_dict()
+#validate()

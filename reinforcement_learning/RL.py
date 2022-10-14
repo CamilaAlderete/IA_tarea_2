@@ -13,58 +13,23 @@ from copy import deepcopy
 
 class RL:
 
-    def __init__(self, player_color, N):
+    def __init__(self, game, player_color):
         self.player_color = player_color
         #self.game = game #board actual
-        self.last_board = [] #board anterior
+        self.last_game_state = None #board y otros datos anteriores del juego
+        self.current_game_state = game #board y otros datos actuales del juego
         self.training = False
         self.look_up_table = {}
-        self.q_rate = 0.8  #80% elitista, 20% random
-        self.q_rate_list = [0.8]
+        self.q_rate = None  #80% elitista, 20% random
+        #self.q_rate_list = [0.8]
         self.alpha = 0.5
-        self.N = N #training count
+        self.N = None #training count
 
     def reset(self):
-        self.game = self.game.reset()
+        self.current_game_state.reset()
 
     def set_N(self, N):
         self.N = N
-
-    def set_game(self, game):
-        self.game = game
-
-    #def set_training_var(self, option):
-    #    self.training = option
-
-    #def get_training_var(self):
-    #    return self.training
-
-    def train(self, training_count, human_training_count, total_experiments):
-
-        self.training = True
-
-        for q in range(self.q_rate_list):
-
-            self.set_q_rate(q)
-
-            for j in range(total_experiments):
-
-                #entrenamiento adversarial
-                self.set_N(training_count)
-                for i in range(self.N):
-                    self.reset()
-                    self.update_alpha(i)
-
-                    #jugar
-
-                # entrenamiento contra humano
-                self.set_N(human_training_count)
-                for i in range(self.N):
-                    self.reset()
-                    #self.update_alpha(i)
-                    # jugar
-
-        #guardar resultados de entrenamiento
 
     def play(self):
 
@@ -76,35 +41,31 @@ class RL:
             else:
                 probability, move = self.play_random()
 
-            self.update_probability(self.game.get_board(), probability)
+            self.update_probability(self.current_game_state, probability)
 
         else:
             probability, move = self.play_elitist()
 
-        self.last_board = self.game.get_board().board
         if move is not None:
-            #self.set_new_board(move.board)
-            #self.set_new_board(move)
-            self.game.ai_move(move)
+            self.current_game_state.ai_move(move)
         else:
-            self.game.change_turn()
-
-
-
-
+            self.current_game_state.change_turn()
 
     def play_elitist(self):
 
-        max_probability = 0.0 #float('-inf')
+        max_probability = float('-inf')
         best_move = None
-        moves = get_all_moves(self.game.get_board(), self.player_color, self.game)
+        moves = get_all_moves(self.current_game_state.board, self.player_color, self.current_game_state)
         random.shuffle(moves)
 
         for move in moves:
-            # probability = self.get_probability(move)
-            #probability = self.reward(move.board)
+
             probability = self.reward(move)
             max_probability, best_move = max_(max_probability, probability, best_move, move)
+
+        #no hay movimientos candidatos, perdio o empato
+        # if best_move is None:
+        #     return 0.0, None
 
         return max_probability, best_move
 
@@ -112,50 +73,33 @@ class RL:
 
         probability = 0.0
         move = None
-        moves = get_all_moves(self.game.get_board(), self.player_color, self.game)
+        moves = get_all_moves(self.current_game_state.board, self.player_color, self.current_game_state)
         random.shuffle(moves)
 
         if len(moves) > 0:
             move = random.choice(moves)
-            #probability = self.reward(move.board)
             probability = self.reward(move)
+
+        # else:
+        #     return 0.0, None
 
         return probability, move
 
-    def validate(self, total_games):
 
-        wins = losses = draws = 0
+    def reward(self, next_move):
 
-        self.training = False
-        self.reset()
+        #Se obtiene la probabilidad del movimiento candidato
 
-        for i in range(total_games):
-            self.reset()
-            #jugar
-            #result = self.get_game_result()
-            ################
-            result = True
-            if result == 'Win':
-                wins += 1
-            elif result == 'Draw':
-                draws += 1
-            else:
-                losses += 1
-
-    def reward(self, move):
-
-        prev_move = self.game.get_board()
-
-        #result = self.get_game_result()
-
-        result = self.get_game_result(move)
+        next_game_state = deepcopy(self.current_game_state)
+        next_game_state.ai_move(next_move)
+        result = next_game_state.winner()
 
         if result == self.player_color: #gana el jugador
             return 1.0
         elif result == self.get_opponent() or result == 'Empate': #gana el oponente o empate
             return 0.0
-        else: # el juego continua
-            return self.get_probability(move.board)
+        else:# el juego continua
+            return self.get_probability(next_move.board)
 
     def get_opponent(self):
         if self.player_color == WHITE:
@@ -165,9 +109,9 @@ class RL:
 
     def get_probability(self, board):
 
-        move = self.serialize_board(board)
+        serial = self.serialize_board(board)
 
-        probability = self.look_up_table.get(move)
+        probability = self.look_up_table.get(serial)
 
         if probability is not None:
 
@@ -181,78 +125,35 @@ class RL:
         else:
             return 0.5
 
-    def update_probability(self, current_board, next_board_prob):
+    def get_probability_current_board(self, current_game_state):
+
+        #innecesario el result....
+        result = current_game_state.winner()
+
+        if result == self.player_color:  # gana el jugador
+            return 1.0
+        elif result == self.get_opponent() or result == 'Empate':  # gana el oponente o empate
+            return 0.0
+        else:  # el juego continua
+            return self.get_probability(current_game_state.board.board)
+
+    def update_probability(self, current_game_state, next_board_prob):
 
         """
             La tabla de aprendizaje esta estructurada para tener los datos del jugador negro, si el jugador
             es blanco y se desea actualizar la tabla, debe hacerlo pero con el complemento
         """
 
-        #probability = self.get_probability(current_board)
-        probability = self.reward(current_board)
-
+        probability = self.get_probability_current_board(current_game_state)
+        #probability = self.reward(current_board)
         # if self.player_color == WHITE:
         #     next_board_prob = 1 - next_board_prob
         #     probability = 1 - probability #??????????
 
         probability = probability + self.alpha*(next_board_prob - probability)
 
-        board = self.serialize_board(current_board.board)
+        board = self.serialize_board(current_game_state.board.board)
         self.look_up_table.update({board: probability})
-
-
-
-    def get_game_result(self, new_board):
-
-        prev_board = self.game.get_board()
-        movimientos_sin_captura = self.game.movimientos_sin_captura
-
-        diff_white = new_board.white_left - prev_board.white_left
-        diff_black = new_board.red_left - prev_board.red_left
-
-        if diff_white < 0 or diff_black < 0:
-            movimientos_sin_captura = 0
-        else:
-            movimientos_sin_captura += 1
-
-        if movimientos_sin_captura == 100:
-            return 'Empate'
-
-        turn = get_opponent(self.game.turn)
-        white_valid_moves = new_board.has_valid_moves(WHITE)
-        black_valid_moves = new_board.has_valid_moves(BLACK)
-        remaining_pieces = new_board.remaining_pieces()
-
-        if turn == WHITE:
-
-            if remaining_pieces["white"] == 0:
-                return BLACK
-
-            if white_valid_moves is False:
-
-                #blancas sin movimientos validos pero las negras si tienen, ganan las negras
-                if black_valid_moves is True:
-                    return BLACK
-
-                #blanco ni negro con movimientos validos, empate
-                else:
-                    return 'Empate'
-
-        else:
-            if remaining_pieces["black"] == 0:
-                return WHITE
-
-            if black_valid_moves is False:
-
-                # negras sin movimientos validos pero las blancas si tienen, ganan las blancas
-                if white_valid_moves is True:
-                    return WHITE
-
-                # blanco ni negro con movimientos validos, empate
-                else:
-                    return 'Empate'
-
-
 
 
     def set_q_rate(self, q_rate):
@@ -326,12 +227,12 @@ class RL:
                 board[row].append(0)
         return board
 
-    def set_new_board(self, new_board):
-        # new_board = Board()
-        # new_board.set_new_board(board)
-        self.game.difference(new_board)
-        self.game.board = new_board
-        #self.game.board.set_new_board(board)
+    # def set_new_board(self, new_board):
+    #     # new_board = Board()
+    #     # new_board.set_new_board(board)
+    #     self.game.difference(new_board)
+    #     self.game.board = new_board
+    #     #self.game.board.set_new_board(board)
 
     def store_dict(self):
 
@@ -357,6 +258,7 @@ class RL:
             # else:
             #     file = open('black_table.pkl', 'rb')
             file = open('learning_table.pkl', 'rb')
+            #file = open('learning_table.pkl', 'a')
             self.look_up_table = pickle.load(file)
             file.close()
         except:
@@ -392,3 +294,14 @@ class RL:
 
         except:
             print('No se pudo guardar los resultados')
+
+    def finish(self, result):
+
+        if result == self.player_color:
+            probability = 1.0
+        else:
+            probability = 0.0
+
+        board = self.serialize_board(self.current_game_state.board.board)
+        self.look_up_table.update({board: probability})
+

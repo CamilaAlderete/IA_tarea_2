@@ -75,11 +75,11 @@ class Game:
         if self.turn == BLACK:
             self.turn = WHITE
             self.white_valid_moves = self.board.has_valid_moves(WHITE)
-            print("Turno del blanco")
+            #print("Turno del blanco")
         else:
             self.turn = BLACK
             self.black_valid_moves = self.board.has_valid_moves(BLACK)
-            print("Turno del negro")
+            #print("Turno del negro")
 
     def get_board(self):
         return self.board

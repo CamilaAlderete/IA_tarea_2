@@ -87,34 +87,50 @@ def human_vs_ai(game):
 def prunning_vs_prunning(game,profundidadNegro, profundidadBlanco):
 
     if game.turn == WHITE:
+        inicio = time.time()
         value, new_board = minimax_alpha_beta_prunning(game.get_board(), profundidadBlanco, float('-inf'), float('inf'), True, WHITE, WHITE, game)
         game.ai_move(new_board)
+        tiempoTurno = time.time() - inicio
+        print("Turno del blanco : ",round(tiempoTurno,5), " segundos")
     else:
+        inicio = time.time()
         value2, new_board2 = minimax_alpha_beta_prunning(game.get_board(), profundidadNegro, float('-inf'), float('inf'), True, BLACK, BLACK, game)
         game.ai_move(new_board2)
+        tiempoTurno = time.time() - inicio
+        print("Turno del negro : ", round(tiempoTurno,5), " segundos")
 
 
 def minimax_vs_prunnig(game,profundidadNegro,profundidadBlanco):
 
     if game.turn == WHITE:
+        inicio = time.time()
         value, new_board = minimax_alpha_beta_prunning(game.get_board(), profundidadBlanco, float('-inf'), float('inf'), True, WHITE, WHITE, game)
         game.ai_move(new_board)
+        tiempoTurno= time.time() - inicio
+        print("Turno del blanco : ",round(tiempoTurno,5), " segundos")
     else:
+        inicio = time.time()
         value2, new_board2 = minimax(game.get_board(), profundidadNegro, True, BLACK, BLACK, game)
         game.ai_move(new_board2)
+        tiempoTurno = time.time() - inicio
+        print("Turno del negro : ",round(tiempoTurno,5), " segundos")
 
 
 
 def minimax_vs_minimax(game,profundidadBlanco,profundidadNegro):
 
     if game.turn == WHITE:
+        inicio = time.time()
         value, new_board = minimax(game.get_board(), profundidadBlanco, True, WHITE, WHITE, game)
         game.ai_move(new_board)
-
-
+        tiempoTurno = time.time() - inicio
+        print("Turno del blanco : ",round(tiempoTurno,5), " segundos")
     else:
+        inicio = time.time()
         value2, new_board2 = minimax(game.get_board(), profundidadNegro, True, BLACK, BLACK, game)
         game.ai_move(new_board2)
+        tiempoTurno = time.time() - inicio
+        print("Turno del negro : ",round(tiempoTurno,5), " segundos")
 
 
 

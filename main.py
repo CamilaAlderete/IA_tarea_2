@@ -1,4 +1,5 @@
 import pygame
+import time
 import PySimpleGUI as psg
 from checkers.constants import BLACK,WHITE, WIDTH, HEIGHT, SQUARE_SIZE
 from checkers.board import Board

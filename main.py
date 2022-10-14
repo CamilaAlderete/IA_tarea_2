@@ -1,12 +1,10 @@
 import pygame
+import PySimpleGUI as psg
 from checkers.constants import BLACK,WHITE, WIDTH, HEIGHT, SQUARE_SIZE
 from checkers.board import Board
 from checkers.game import Game
 import pyautogui
 from minimax.algorithm import minimax, minimax_alpha_beta_prunning
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-
-pygame.display.set_caption('Damas')
 
 from reinforcement_learning.RL import RL
 
@@ -17,12 +15,16 @@ def get_row_col_from_mouse(pos):
     col = x // SQUARE_SIZE
     return row, col
 
-def main():
+def main(algoritmo, profundidadNegro,profundidadBlanco):
+    WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+
+    pygame.display.set_caption('Damas')
+
     run = True
     FPS = 60
     clock = pygame.time.Clock()
     game = Game(WIN)
-    rl = RL(BLACK, game,1)
+    # rl = RL(BLACK, game,1)
 
     while run:
         clock.tick(FPS)
@@ -30,10 +32,12 @@ def main():
         winner = game.winner()
 
         if winner is None:
-
-            #prunning_vs_prunning(game)
-            #minimax_vs_minimax(game)
-            #minimax_vs_prunnig(game)
+            if(algoritmo=="Minimax vs Minimax"):
+                minimax_vs_minimax(game,profundidadNegro,profundidadBlanco)
+            if (algoritmo=="Prunning vs Prunning"):
+                prunning_vs_prunning(game,profundidadNegro,profundidadBlanco)
+            if(algoritmo=="Minimax vs Prunnig"):
+                minimax_vs_prunnig(game,profundidadNegro,profundidadBlanco)
             if game.turn == WHITE:
                 # El numero indica que tan profundo buscara en el arbol para tomar una decision
                 # value, new_board = minim0ax(game.get_board(), 4, WHITE, game)
@@ -79,40 +83,64 @@ def human_vs_ai(game):
     else:
         game.update()
 
-def prunning_vs_prunning(game):
+def prunning_vs_prunning(game,profundidadNegro, profundidadBlanco):
 
     if game.turn == WHITE:
-        value, new_board = minimax_alpha_beta_prunning(game.get_board(), 3, float('-inf'), float('inf'), True, WHITE, WHITE, game)
+        value, new_board = minimax_alpha_beta_prunning(game.get_board(), profundidadBlanco, float('-inf'), float('inf'), True, WHITE, WHITE, game)
         game.ai_move(new_board)
     else:
-        value2, new_board2 = minimax_alpha_beta_prunning(game.get_board(), 2, float('-inf'), float('inf'), True, BLACK, BLACK, game)
+        value2, new_board2 = minimax_alpha_beta_prunning(game.get_board(), profundidadNegro, float('-inf'), float('inf'), True, BLACK, BLACK, game)
         game.ai_move(new_board2)
 
 
-def minimax_vs_prunnig(game):
+def minimax_vs_prunnig(game,profundidadNegro,profundidadBlanco):
 
     if game.turn == WHITE:
-        value, new_board = minimax_alpha_beta_prunning(game.get_board(), 4, float('-inf'), float('inf'), True, WHITE, WHITE, game)
+        value, new_board = minimax_alpha_beta_prunning(game.get_board(), profundidadBlanco, float('-inf'), float('inf'), True, WHITE, WHITE, game)
         game.ai_move(new_board)
     else:
-        value2, new_board2 = minimax(game.get_board(), 3, True, BLACK, BLACK, game)
-        game.ai_move(new_board2)
-
-
-
-def minimax_vs_minimax(game):
-
-    if game.turn == WHITE:
-        value, new_board = minimax(game.get_board(), 2, True, WHITE, WHITE, game)
-        game.ai_move(new_board)
-
-
-    else:
-        value2, new_board2 = minimax(game.get_board(), 3, True, BLACK, BLACK, game)
+        value2, new_board2 = minimax(game.get_board(), profundidadNegro, True, BLACK, BLACK, game)
         game.ai_move(new_board2)
 
 
 
+def minimax_vs_minimax(game,profundidadBlanco,profundidadNegro):
+
+    if game.turn == WHITE:
+        value, new_board = minimax(game.get_board(), profundidadBlanco, True, WHITE, WHITE, game)
+        game.ai_move(new_board)
 
 
-main()
+    else:
+        value2, new_board2 = minimax(game.get_board(), profundidadNegro, True, BLACK, BLACK, game)
+        game.ai_move(new_board2)
+
+
+
+def Menu():
+
+    # minimax_vs_prunnig(game)
+    # set the theme for the screen/window
+    psg.theme('SystemDefault')
+    # define layout
+    layout = [[psg.Text('Elegir Algoritmo', size=(20, 1), font='Lucida', justification='left')],
+              [psg.Combo(['Minimax vs Minimax', 'Prunning vs Prunning', 'Minimax vs Prunnig'],default_value='', key='algoritmo')],
+              [psg.Text('Elegir Profundidad Negro', size=(30, 1), font='Lucida', justification='left')],
+              [psg.Combo( ['2','3','4','5','6'],key='profundidadNegro')],
+              [psg.Text('Elegir Profundidad Blanco', size=(30, 1), font='Lucida', justification='left')],
+              [psg.Combo(['2', '3', '4', '5', '6'], key='profundidadBlanco')],
+              [psg.Button('Ejecutar', font=('Times New Roman', 12)), psg.Button('Finalizar', font=('Times New Roman', 12))]]
+    # Define Window
+    win = psg.Window('Damas', layout)
+    while(True):
+        # Read  values entered by user
+        e, v = win.read()
+        # close first window
+        if( e == "Finalizar"):
+            win.close()
+            break
+        else:
+            main(v['algoritmo'], int(v['profundidadNegro']), int(v['profundidadBlanco']))
+            # psg.popup('' + v['algoritmo'] + ' : ' + v['profundidadNegro'] + ' ' + v['profundidadBlanco'])
+
+Menu()

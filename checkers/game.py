@@ -10,23 +10,6 @@ class Game:
     def __init__(self):
        self._init()
 
-    # def update(self):
-    #     self.board.draw(self.win)
-    #     self.draw_valid_moves(self.valid_moves)
-    #     pygame.display.update()
-
-    # def _init(self):
-    #     self.selected = None
-    #     self.board = Board()
-    #     self.turn = BLACK
-    #     self.valid_moves = {}
-    #     self.white_valid_moves = True
-    #     self.black_valid_moves = True
-    #     self.movimientos_sin_captura = 0
-
-    # def winner(self):
-    #     return self.board.winner()
-
     def _init(self):
         self.selected = None
         self.board = Board()
@@ -76,11 +59,6 @@ class Game:
             return False
 
         return True
-    
-    # def draw_valid_moves(self, moves):
-    #     for move in moves:
-    #         row, col = move
-    #         pygame.draw.circle(self.win, GREEN , (col * SQUARE_SIZE + SQUARE_SIZE // 2, row * SQUARE_SIZE + SQUARE_SIZE // 2), 15)
 
     def change_turn(self):
         self.valid_moves = {}

@@ -19,3 +19,7 @@ del oponente.
     pip install pygame
     pip install pyautogui
 
+## Referencias
+[Introduction to Machine Learning and Design of a Learning System](https://medium.datadriveninvestor.com/3-steps-introduction-to-machine-learning-and-design-of-a-learning-system-bd12b65aa50c)
+
+[Reinforcement Learning aplicado al Tic Tac Toe](https://github.com/jpaciello/ia)

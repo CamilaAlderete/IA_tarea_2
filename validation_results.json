@@ -1,0 +1,9 @@
+{
+    "wins": 0,
+    "draws": 0,
+    "losses": 100,
+    "total_games": 100,
+    "wins_ratio_acum": 0.0,
+    "draws_ratio_acum": 0.0,
+    "losses_ratio_Acum": 1.0
+}

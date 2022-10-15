@@ -16,7 +16,7 @@ class RL:
     def __init__(self, game, player_color):
         self.player_color = player_color
         #self.game = game #board actual
-        self.last_game_state = None #board y otros datos anteriores del juego
+        self.last_game_state = None #deepcopy(game) #board y otros datos anteriores del juego
         self.current_game_state = game #board y otros datos actuales del juego
         self.training = False
         self.look_up_table = {}
@@ -27,6 +27,7 @@ class RL:
 
     def reset(self):
         self.current_game_state.reset()
+        #self.last_game_state.reset()
 
     def set_N(self, N):
         self.N = N
@@ -53,7 +54,7 @@ class RL:
 
     def play_elitist(self):
 
-        max_probability = float('-inf')
+        max_probability = float('-inf') #-1???
         best_move = None
         moves = get_all_moves(self.current_game_state.board, self.player_color, self.current_game_state)
         random.shuffle(moves)
@@ -96,10 +97,12 @@ class RL:
 
         if result == self.player_color: #gana el jugador
             return 1.0
-        elif result == self.get_opponent() or result == 'Empate': #gana el oponente o empate
+        elif result == 'Empate': #gana el oponente o empate
             return 0.0
+        elif result == self.get_opponent():
+            return -1.0
         else:# el juego continua
-            return self.get_probability(next_move.board)
+            return self.get_probability(next_game_state)
 
     def get_opponent(self):
         if self.player_color == WHITE:
@@ -107,9 +110,9 @@ class RL:
         else:
             return WHITE
 
-    def get_probability(self, board):
+    def get_probability(self, game_status):
 
-        serial = self.serialize_board(board)
+        serial = self.serialize_board(game_status.board.board)
 
         probability = self.look_up_table.get(serial)
 
@@ -123,19 +126,29 @@ class RL:
             # else:
             #     return 1 - probability
         else:
-            return 0.5
+            #return 0.5
+            total = game_status.board.red_left + game_status.board.white_left
+
+            if self.player_color == BLACK:
+                return (game_status.board.red_left - game_status.board.white_left)/total
+            else:
+                return (game_status.board.white_left - game_status.board.red_left)/total
+
+
 
     def get_probability_current_board(self, current_game_state):
 
         #innecesario el result....
         result = current_game_state.winner()
 
-        if result == self.player_color:  # gana el jugador
+        if result == self.player_color:
             return 1.0
-        elif result == self.get_opponent() or result == 'Empate':  # gana el oponente o empate
+        elif result == 'Empate':
             return 0.0
-        else:  # el juego continua
-            return self.get_probability(current_game_state.board.board)
+        elif result == self.get_opponent():
+            return -1.0
+        else:
+            return self.get_probability(current_game_state)
 
     def update_probability(self, current_game_state, next_board_prob):
 
@@ -299,9 +312,25 @@ class RL:
 
         if result == self.player_color:
             probability = 1.0
+        elif result == self.get_opponent():
+            probability = -1.0
         else:
             probability = 0.0
 
-        board = self.serialize_board(self.current_game_state.board.board)
-        self.look_up_table.update({board: probability})
+        if self.training:
+            board = self.serialize_board(self.current_game_state.board.board)
+            self.look_up_table.update({board: probability})
 
+    # def reward_(self, next_move):
+    #
+    #     # Se obtiene la probabilidad del movimiento candidato
+    #
+    #     next_game_state = deepcopy(self.current_game_state)
+    #     next_game_state.ai_move(next_move)
+    #     result = next_game_state.winner()
+    #
+    #     if result == self.player_color: #gana el jugador
+    #         return 1.0
+    #     elif result == self.get_opponent() or result == 'Empate': #gana el oponente o empate
+    #         return 0.0
+    #

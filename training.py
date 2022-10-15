@@ -22,7 +22,7 @@ def get_row_col_from_mouse(pos):
     col = x // SQUARE_SIZE
     return row, col
 
-def main():
+def train():
 
     window = Window(WIN)
     game = window.game
@@ -36,24 +36,15 @@ def main():
         agente.training = True
         agente.load_dict()
 
-
         for j in range(1):
 
             # entrenamiento adversarial
-            agente.set_N(10000)
+            agente.set_N(10)
 
             for k in range(agente.N):
                 agente.update_alpha(k)
                 start_game(agente, window)
                 agente.reset()
-
-
-            # entrenamiento contra humano
-            # rl.set_N(1)
-            # for i in range(rl.N):
-            #     rl.reset()
-                # self.update_alpha(i)
-                # jugar
 
         if agente.training:
             agente.store_dict()
@@ -64,18 +55,18 @@ def validate():
     window = Window(WIN)
     game = window.game
     q_rate_list = [0.8]
+    agente = RL(game, BLACK)
+    agente.training = False
+    agente.load_dict()
+    wins = draws = losses = 0
 
     for i in range(len(q_rate_list)):
 
-        agente = RL(game, BLACK)
         agente.set_q_rate(q_rate_list[i])
-        agente.training = False
-        agente.load_dict()
-        wins = draws = losses = 0
 
         for j in range(1):
 
-            agente.set_N(3)
+            agente.set_N(100)
 
             for k in range(agente.N):
 
@@ -113,7 +104,7 @@ def start_game(agente, window):
                 game.ai_move(new_board2)
         else:
 
-            agente.finish(winner)
+            agente.finish(winner)#preguntar condicion de entrenando
             if not agente.training:
                 return winner
 
@@ -133,7 +124,7 @@ def start_game(agente, window):
     #pygame.quit()
 
 
-def watch_dict():
+def watch_learning_table():
 
     window = Window(WIN)
     game = window.game
@@ -142,23 +133,22 @@ def watch_dict():
     agente = RL(game, BLACK)
 
     try:
-        # if self.player_color == WHITE:
-        #     file = open('white_table.pkl', 'rb')
-        # else:
-        #     file = open('black_table.pkl', 'rb')
+
         file = open('learning_table.pkl', 'rb')
         dict = pickle.load(file)
         suma = 0
 
         for key in dict:
-            if dict[key] == 1.0:
+
+            print()
+            if dict[key] == 0.0:
                 clock.tick(FPS)
 
                 game.board.board = agente.deserialize_board(key)
                 window.update()
-                time.sleep(3)
+                time.sleep(2)
                 suma += 1
-                if suma == 20:
+                if suma == 100:
                     break
 
         print(suma)
@@ -168,6 +158,6 @@ def watch_dict():
         print('No se pudo cargar la tabla de aprendizaje')
 
 
-#main()
-watch_dict()
+#train()
+watch_learning_table()
 #validate()

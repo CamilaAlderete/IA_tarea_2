@@ -39,7 +39,7 @@ def train():
         for j in range(1):
 
             # entrenamiento adversarial
-            agente.set_N(10)
+            agente.set_N(10000)
 
             for k in range(agente.N):
                 agente.update_alpha(k)

@@ -151,7 +151,7 @@ def Menu():
               [psg.Combo( ['2','3','4','5','6'],key='profundidadNegro')],
               [psg.Text('Elegir Profundidad Blanco', size=(30, 1), font='Lucida', justification='left')],
               [psg.Combo(['2', '3', '4', '5', '6'], key='profundidadBlanco')],
-              [psg.Button('Ejecutar', font=('Times New Roman', 12)), psg.Button('Finalizar', font=('Times New Roman', 12))]]
+              [psg.Button('Ejecutar', font=('Lucida', 10)), psg.Button('Finalizar', font=('Lucida', 10))]]
     # Define Window
     win = psg.Window('Damas', layout)
     while(True):

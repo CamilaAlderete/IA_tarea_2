@@ -66,7 +66,7 @@ def validate():
 
         for j in range(1):
 
-            agente.set_N(100)
+            agente.set_N(10000)
 
             for k in range(agente.N):
 
@@ -124,40 +124,7 @@ def start_game(agente, window):
     #pygame.quit()
 
 
-def watch_learning_table():
-
-    window = Window(WIN)
-    game = window.game
-    agente = RL(game, BLACK)
-    clock = pygame.time.Clock()
-    agente = RL(game, BLACK)
-
-    try:
-
-        file = open('learning_table.pkl', 'rb')
-        dict = pickle.load(file)
-        suma = 0
-
-        for key in dict:
-
-            print()
-            if dict[key] == 0.0:
-                clock.tick(FPS)
-
-                game.board.board = agente.deserialize_board(key)
-                window.update()
-                time.sleep(2)
-                suma += 1
-                if suma == 100:
-                    break
-
-        print(suma)
-
-        file.close()
-    except:
-        print('No se pudo cargar la tabla de aprendizaje')
 
 
-#train()
-watch_learning_table()
+train()
 #validate()

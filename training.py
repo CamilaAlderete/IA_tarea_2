@@ -66,7 +66,7 @@ def validate():
 
         for j in range(1):
 
-            agente.set_N(10000)
+            agente.set_N(100)
 
             for k in range(agente.N):
 

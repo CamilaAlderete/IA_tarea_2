@@ -15,6 +15,12 @@ Damas clásico que se juega en nuestro país (con fichas normales y fichas coron
 ejemplo). Función de evaluación posible: Suma ponderada de fichas propias – suma ponderada de fichas
 del oponente.
 
+## Jugar
+    python iniciar_juego.py 
+
+## Ver tabla de aprendizaje
+    python training_results.py 
+
 ## Dependencias
     pip install pygame
     pip install pyautogui

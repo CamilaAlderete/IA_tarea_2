@@ -8,6 +8,7 @@ import pyautogui
 from minimax.algorithm import Min, Poda
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 from checkers.window import Window
+from reinforcement_learning.RL import RL
 
 pygame.display.set_caption('Damas')
 
@@ -34,6 +35,8 @@ def main(algoritmo, profundidadNegro,profundidadBlanco):
     poda_1 = Poda()
     min_2 = Min()
     poda_2 = Poda()
+    rl = RL(game, BLACK)
+    rl.training = False
     black_player_nodes = 0
     white_player_nodes = 0
     black_time = []
@@ -45,43 +48,77 @@ def main(algoritmo, profundidadNegro,profundidadBlanco):
 
         if winner is None:
             if algoritmo == "Minimax vs Minimax":
-                minimax_vs_minimax(game, profundidadNegro, profundidadBlanco, min_1, min_2)
+
+                turno, tiempo = minimax_vs_minimax(game, profundidadNegro, profundidadBlanco, min_1, min_2)
                 black_player_nodes = min_1.nodos
                 white_player_nodes = min_2.nodos
+
+                if turno == BLACK:
+                    black_time.append(tiempo)
+                else:
+                    white_time.append(tiempo)
+
             elif algoritmo == "Poda vs Poda":
-                prunning_vs_prunning(game,profundidadNegro, profundidadBlanco, poda_1, poda_2)
+
+                turno, tiempo = prunning_vs_prunning(game,profundidadNegro, profundidadBlanco, poda_1, poda_2)
                 black_player_nodes = poda_1.nodos
                 white_player_nodes = poda_2.nodos
+
+                if turno == BLACK:
+                    black_time.append(tiempo)
+                else:
+                    white_time.append(tiempo)
+
             elif algoritmo == "Minimax vs Poda":
-                minimax_vs_prunnig(game,profundidadNegro, profundidadBlanco, min_1, poda_1)
+
+                turno, tiempo = minimax_vs_prunnig(game,profundidadNegro, profundidadBlanco, min_1, poda_1)
                 black_player_nodes = min_1.nodos
                 white_player_nodes = poda_1.nodos
+
+                if turno == BLACK:
+                    black_time.append(tiempo)
+                else:
+                    white_time.append(tiempo)
+
             elif algoritmo == "Humano vs Poda":
                 human_vs_ai(game, profundidadBlanco, poda_1)
                 white_player_nodes = poda_1.nodos
+            elif algoritmo == "RL vs Minimax":
 
+                turno, tiempo = RL_vs_minimax(game, profundidadBlanco, rl, min_1)
+                black_player_nodes = rl.nodes
+                white_player_nodes = min_1.nodos
+
+                if turno == BLACK:
+                    black_time.append(tiempo)
+                else:
+                    white_time.append(tiempo)
             window.update()
 
         else:
             if winner == BLACK:
                 pyautogui.alert("Gano el jugador: NEGRO")
+                r = 'Ganador: Negro'
             elif winner == WHITE:
                 pyautogui.alert("Gano el jugador: BLANCO")
+                r = 'Ganador: Blanco'
             else:
                 pyautogui.alert("Empate")
+                r = 'Empate'
 
+            print()
+            print(r)
             print_nodos(black_player_nodes, white_player_nodes)
+            print('Tiempo negras:')
+            print(black_time)
+            print('Tiempo blancas')
+            print(white_time)
 
             run = False
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-            #
-            # if event.type == pygame.MOUSEBUTTONDOWN:
-            #     pos = pygame.mouse.get_pos()
-            #     row, col = get_row_col_from_mouse(pos)
-            #     game.select(row, col)
 
         window.update()
     pygame.quit()
@@ -95,15 +132,26 @@ def human_vs_human():
 def human_vs_ai( game, profundidadBlanco,poda):
 
     if game.turn == WHITE:
+        inicio = time.time()
+
         value, new_board = poda.minimax_alpha_beta_prunning(game.get_board(), profundidadBlanco, float('-inf'), float('inf'), True, WHITE, WHITE, game)
         game.ai_move(new_board)
+
+        tiempoTurno = time.time() - inicio
+        return WHITE, tiempoTurno
+
     else:
+
+        inicio = time.time()
 
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 row, col = get_row_col_from_mouse(pos)
                 game.select(row, col)
+
+        tiempoTurno = time.time() - inicio
+        return BLACK, tiempoTurno
 
 def prunning_vs_prunning(game,profundidadNegro, profundidadBlanco, poda_1, poda_2):
 
@@ -219,6 +267,28 @@ def minimax_vs_minimax(game,profundidadNegro, profundidadBlanco, min_1, min_2):
         return WHITE, tiempoTurno
 
 
+def RL_vs_minimax(game, profundidadBlanco, rl, min):
+
+    if game.turn == BLACK:
+
+        inicio = time.time()
+
+        rl.play()
+
+        tiempoTurno = time.time() - inicio
+        return BLACK, tiempoTurno
+
+
+    else:
+
+        inicio = time.time()
+
+        value, new_board = min.minimax(game.get_board(), profundidadBlanco, True, WHITE, WHITE, game)
+        game.ai_move(new_board)
+
+        tiempoTurno = time.time() - inicio
+        #print("Turno del blanco : ", round(tiempoTurno, 5), " segundos")
+        return WHITE, tiempoTurno
 
 
 def print_nodos(black_player_nodes, white_player_nodes):
@@ -241,7 +311,7 @@ def Menu():
     psg.theme('SystemDefault')
     # define layout
     layout = [[psg.Text('Elegir Algoritmo', size=(20, 1), font='Lucida', justification='left')],
-              [psg.Combo(['Minimax vs Minimax', 'Poda vs Poda', 'Minimax vs Poda', 'Humano vs Poda'],default_value='', key='algoritmo')],
+              [psg.Combo(['Minimax vs Minimax', 'Poda vs Poda', 'Minimax vs Poda','RL vs Minimax', 'Humano vs Poda'],default_value='', key='algoritmo')],
               [psg.Text('Elegir Profundidad Negro', size=(30, 1), font='Lucida', justification='left')],
               [psg.Combo( ['2','3','4','5','6'],key='profundidadNegro')],
               [psg.Text('Elegir Profundidad Blanco', size=(30, 1), font='Lucida', justification='left')],
@@ -257,7 +327,7 @@ def Menu():
             win.close()
             break
         else:
-            if v['algoritmo'] == 'Humano vs Poda':
+            if v['algoritmo'] == 'Humano vs Poda' or v['algoritmo'] == 'RL vs Minimax':
                 main(v['algoritmo'], 0, int(v['profundidadBlanco']))
             else:
                 main(v['algoritmo'], int(v['profundidadNegro']), int(v['profundidadBlanco']))

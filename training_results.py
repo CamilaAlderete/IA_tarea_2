@@ -32,7 +32,6 @@ def watch_learning_table(resultado, cantidad):
 
         for key in dict:
 
-            print()
             if dict[key] == r:
 
                 clock.tick(FPS)
@@ -47,7 +46,6 @@ def watch_learning_table(resultado, cantidad):
                 suma += 1
                 if suma == cantidad:
                     break
-
 
         file.close()
     except:

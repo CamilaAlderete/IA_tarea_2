@@ -24,6 +24,7 @@ class RL:
         #self.q_rate_list = [0.8]
         self.alpha = 0.5
         self.N = None #training count
+        self.nodes = 0
 
     def reset(self):
         self.current_game_state.reset()
@@ -63,6 +64,7 @@ class RL:
 
             probability = self.reward(move)
             max_probability, best_move = max_(max_probability, probability, best_move, move)
+            self.nodes += 1
 
         #no hay movimientos candidatos, perdio o empato
         # if best_move is None:
@@ -158,11 +160,6 @@ class RL:
         """
 
         probability = self.get_probability_current_board(current_game_state)
-        #probability = self.reward(current_board)
-        # if self.player_color == WHITE:
-        #     next_board_prob = 1 - next_board_prob
-        #     probability = 1 - probability #??????????
-
         probability = probability + self.alpha*(next_board_prob - probability)
 
         board = self.serialize_board(current_game_state.board.board)

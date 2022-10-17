@@ -28,95 +28,107 @@ def get_all_moves(board, color, game):
 
 # nuestra posicion en el tablero, la profundidad del arbol y el jugador
 # Si max es true, es el turno de la maquina
-def minimax(position, depth, max_player, player_color, color, game):
+class Min:
 
-    if depth == 0 or game.winner() is not None:
-        return position.evaluate(color), position
+    def __init__(self):
+        self.nodos = 0
 
-    opponent_color = get_opponent(player_color)
+    def minimax(self, position, depth, max_player, player_color, color, game):
 
-    if max_player:
-        max_eval = float('-inf')
-        best_move = None
-
-        # Recorrer todas las jugadas posibles
-        moves = get_all_moves(position, player_color, game)
-        for move in moves:
-            # Hacer la jugada
-            evaluation = minimax(move, depth - 1, False, opponent_color, color, game)[0]
-            max_eval, best_move = max_(max_eval, evaluation, best_move, move)
-
-        #evita bug que surge cuando ya no se tienen movimientos disponibles
-        if len(moves) > 0:
-            return max_eval, best_move
-        else:
+        if depth == 0 or game.winner() is not None:
             return position.evaluate(color), position
 
-    else:
-        min_eval = float('inf')
-        best_move = None
+        opponent_color = get_opponent(player_color)
 
-        moves = get_all_moves(position, player_color, game)
-        for move in moves:
-            evaluation = minimax(move, depth - 1, True, opponent_color, color, game)[0]
-            min_eval, best_move = min_(min_eval, evaluation, best_move, move)
+        if max_player:
+            max_eval = float('-inf')
+            best_move = None
 
-        # evita bug que surge cuando ya no se tienen movimientos disponibles
-        if len(moves) > 0:
-            return min_eval, best_move
+            # Recorrer todas las jugadas posibles
+            moves = get_all_moves(position, player_color, game)
+            for move in moves:
+                # Hacer la jugada
+                evaluation = self.minimax(move, depth - 1, False, opponent_color, color, game)[0]
+                max_eval, best_move = max_(max_eval, evaluation, best_move, move)
+                self.nodos +=1
+
+            #evita bug que surge cuando ya no se tienen movimientos disponibles
+            if len(moves) > 0:
+                return max_eval, best_move
+            else:
+                return position.evaluate(color), position
+
         else:
-            return position.evaluate(color), position
+            min_eval = float('inf')
+            best_move = None
+
+            moves = get_all_moves(position, player_color, game)
+            for move in moves:
+                evaluation = self.minimax(move, depth - 1, True, opponent_color, color, game)[0]
+                min_eval, best_move = min_(min_eval, evaluation, best_move, move)
+                self.nodos += 1
+
+            # evita bug que surge cuando ya no se tienen movimientos disponibles
+            if len(moves) > 0:
+                return min_eval, best_move
+            else:
+                return position.evaluate(color), position
 
 # alpha beta pruning
-def minimax_alpha_beta_prunning(position, depth, alpha, beta, max_player, player_color, color, game):
+class Poda:
+    def __init__(self):
+        self.nodos = 0
+    def minimax_alpha_beta_prunning(self,position, depth, alpha, beta, max_player, player_color, color, game):
 
-    if depth == 0 or game.winner() is not None:
-        return position.evaluate(color), position
-
-    opponent_color = get_opponent(player_color)
-
-    if max_player:
-
-        max_eval = float('-inf')
-        best_move = None
-        moves = get_all_moves(position, player_color, game)
-
-        # Recorrer todas las jugadas posibles
-        for move in moves:
-            # Hacer la jugada
-            evaluation = minimax_alpha_beta_prunning(move, depth - 1, alpha, beta, False, opponent_color, color, game)[0]
-            max_eval, best_move = max_(max_eval, evaluation, best_move, move)
-            alpha = max(alpha, max_eval)
-
-            if max_eval >= beta:
-                break
-
-        # evita bug que surge cuando ya no se tienen movimientos disponibles
-        if len(moves) > 0:
-            return max_eval, best_move
-        else:
+        if depth == 0 or game.winner() is not None:
             return position.evaluate(color), position
 
-    else:
+        opponent_color = get_opponent(player_color)
 
-        min_eval = float('inf')
-        best_move = None
-        moves = get_all_moves(position, player_color, game)
+        if max_player:
 
-        for move in moves:
+            max_eval = float('-inf')
+            best_move = None
+            moves = get_all_moves(position, player_color, game)
 
-            evaluation = minimax_alpha_beta_prunning(move, depth - 1, alpha, beta, True, opponent_color, color, game)[0]
-            min_eval, best_move = min_(min_eval, evaluation, best_move, move)
-            beta = min(beta, min_eval)
+            # Recorrer todas las jugadas posibles
+            for move in moves:
+                # Hacer la jugada
+                evaluation = self.minimax_alpha_beta_prunning(move, depth - 1, alpha, beta, False, opponent_color, color, game)[0]
+                max_eval, best_move = max_(max_eval, evaluation, best_move, move)
+                alpha = max(alpha, max_eval)
+                self.nodos +=1
 
-            if min_eval <= alpha:
-                break
+                if max_eval >= beta:
+                    break
 
-        # evita bug que surge cuando ya no se tienen movimientos disponibles
-        if len(moves) > 0:
-            return min_eval, best_move
+            # evita bug que surge cuando ya no se tienen movimientos disponibles
+            if len(moves) > 0:
+                return max_eval, best_move
+            else:
+                return position.evaluate(color), position
+
         else:
-            return position.evaluate(color), position
+
+            min_eval = float('inf')
+            best_move = None
+            moves = get_all_moves(position, player_color, game)
+
+            for move in moves:
+
+                evaluation = self.minimax_alpha_beta_prunning(move, depth - 1, alpha, beta, True, opponent_color, color, game)[0]
+                min_eval, best_move = min_(min_eval, evaluation, best_move, move)
+                beta = min(beta, min_eval)
+                self.nodos +=1
+
+                if min_eval <= alpha:
+                    break
+
+            # evita bug que surge cuando ya no se tienen movimientos disponibles
+            if len(moves) > 0:
+                return min_eval, best_move
+            else:
+                return position.evaluate(color), position
 
 def get_opponent(color):
     if color == WHITE:

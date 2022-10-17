@@ -7,7 +7,7 @@ from checkers.piece import Piece
 from checkers.board import Board
 import pickle
 import json
-from minimax.algorithm import minimax, minimax_alpha_beta_prunning, get_all_moves, max_
+from minimax.algorithm import get_all_moves, max_
 from copy import deepcopy
 
 
@@ -321,16 +321,3 @@ class RL:
             board = self.serialize_board(self.current_game_state.board.board)
             self.look_up_table.update({board: probability})
 
-    # def reward_(self, next_move):
-    #
-    #     # Se obtiene la probabilidad del movimiento candidato
-    #
-    #     next_game_state = deepcopy(self.current_game_state)
-    #     next_game_state.ai_move(next_move)
-    #     result = next_game_state.winner()
-    #
-    #     if result == self.player_color: #gana el jugador
-    #         return 1.0
-    #     elif result == self.get_opponent() or result == 'Empate': #gana el oponente o empate
-    #         return 0.0
-    #

@@ -3,7 +3,7 @@ from checkers.constants import BLACK,WHITE, WIDTH, HEIGHT, SQUARE_SIZE
 from checkers.board import Board
 from checkers.game import Game
 import pyautogui
-from minimax.algorithm import minimax, minimax_alpha_beta_prunning
+from minimax.algorithm import Min, Poda
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 from checkers.window import Window
 pygame.display.set_caption('Entrenamiento Damas')
@@ -89,7 +89,7 @@ def start_game(agente, window):
     run = True
     clock = pygame.time.Clock()
     game = window.game
-
+    poda = Poda()
     while run:
 
         clock.tick(FPS)
@@ -100,7 +100,7 @@ def start_game(agente, window):
             if game.turn == BLACK:
                 agente.play()
             else:
-                value2, new_board2 = minimax_alpha_beta_prunning(game.get_board(), 2, float('-inf'), float('inf'), True, WHITE, WHITE, game)
+                value2, new_board2 = poda.minimax_alpha_beta_prunning(game.get_board(), 2, float('-inf'), float('inf'), True, WHITE, WHITE, game)
                 game.ai_move(new_board2)
         else:
 

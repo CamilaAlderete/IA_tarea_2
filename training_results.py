@@ -43,10 +43,11 @@ def watch_learning_table(resultado, cantidad):
                 #     continue
 
                 window.update()
-                time.sleep(2)
+                time.sleep(3)
                 suma += 1
                 if suma == cantidad:
                     break
+
 
         file.close()
     except:

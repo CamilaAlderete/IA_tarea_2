@@ -5,7 +5,7 @@ from checkers.constants import BLACK,WHITE, WIDTH, HEIGHT, SQUARE_SIZE
 from checkers.board import Board
 from checkers.game import Game
 import pyautogui
-from minimax.algorithm import minimax, minimax_alpha_beta_prunning
+from minimax.algorithm import Min, Poda
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 from checkers.window import Window
 
@@ -30,26 +30,37 @@ def main(algoritmo, profundidadNegro,profundidadBlanco):
     clock = pygame.time.Clock()
     window = Window(WIN)
     game = window.game
-
-
+    min_1 = Min()
+    poda_1 = Poda()
+    min_2 = Min()
+    poda_2 = Poda()
+    black_player_nodes = 0
+    white_player_nodes = 0
+    black_time = []
+    white_time = []
     while run:
-        clock.tick(FPS)
 
+        clock.tick(FPS)
         winner = game.winner()
 
         if winner is None:
-            if(algoritmo=="Minimax vs Minimax"):
-                minimax_vs_minimax(game,profundidadNegro,profundidadBlanco)
-            if (algoritmo=="Prunning vs Prunning"):
-                prunning_vs_prunning(game,profundidadNegro,profundidadBlanco)
-            if(algoritmo=="Minimax vs Prunnig"):
-                minimax_vs_prunnig(game,profundidadNegro,profundidadBlanco)
-            if game.turn == WHITE:
-                # El numero indica que tan profundo buscara en el arbol para tomar una decision
-                # value, new_board = minim0ax(game.get_board(), 4, WHITE, game)
-                window.update()
-            else:
-                window.update()
+            if algoritmo == "Minimax vs Minimax":
+                minimax_vs_minimax(game, profundidadNegro, profundidadBlanco, min_1, min_2)
+                black_player_nodes = min_1.nodos
+                white_player_nodes = min_2.nodos
+            elif algoritmo == "Poda vs Poda":
+                prunning_vs_prunning(game,profundidadNegro, profundidadBlanco, poda_1, poda_2)
+                black_player_nodes = poda_1.nodos
+                white_player_nodes = poda_2.nodos
+            elif algoritmo == "Minimax vs Poda":
+                minimax_vs_prunnig(game,profundidadNegro, profundidadBlanco, min_1, poda_1)
+                black_player_nodes = min_1.nodos
+                white_player_nodes = poda_1.nodos
+            elif algoritmo == "Humano vs Poda":
+                human_vs_ai(game, profundidadBlanco, poda_1)
+                white_player_nodes = poda_1.nodos
+
+            window.update()
 
         else:
             if winner == BLACK:
@@ -59,16 +70,18 @@ def main(algoritmo, profundidadNegro,profundidadBlanco):
             else:
                 pyautogui.alert("Empate")
 
+            print_nodos(black_player_nodes, white_player_nodes)
+
             run = False
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
-                row, col = get_row_col_from_mouse(pos)
-                game.select(row, col)
+            #
+            # if event.type == pygame.MOUSEBUTTONDOWN:
+            #     pos = pygame.mouse.get_pos()
+            #     row, col = get_row_col_from_mouse(pos)
+            #     game.select(row, col)
 
         window.update()
     pygame.quit()
@@ -79,92 +92,145 @@ def main(algoritmo, profundidadNegro,profundidadBlanco):
 def human_vs_human():
     print()
 
-def human_vs_ai(game):
+def human_vs_ai( game, profundidadBlanco,poda):
 
     if game.turn == WHITE:
-        # El numero indica que tan profundo buscara en el arbol para tomar una decision
-        # value, new_board = minim0ax(game.get_board(), 4, WHITE, game)
-        value, new_board = minimax_alpha_beta_prunning(game.get_board(), 4, float('-inf'), float('inf'), True, WHITE, WHITE, game)
+        value, new_board = poda.minimax_alpha_beta_prunning(game.get_board(), profundidadBlanco, float('-inf'), float('inf'), True, WHITE, WHITE, game)
         game.ai_move(new_board)
     else:
-        game.update()
 
-def prunning_vs_prunning(game,profundidadNegro, profundidadBlanco):
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                row, col = get_row_col_from_mouse(pos)
+                game.select(row, col)
 
-    s = 'Poda('+ str(profundidadNegro)+') vs Poda('+str(profundidadBlanco)+')'
-    print(s)
+def prunning_vs_prunning(game,profundidadNegro, profundidadBlanco, poda_1, poda_2):
 
-    if game.turn == WHITE:
+    #s = 'Poda('+ str(profundidadNegro)+') vs Poda('+str(profundidadBlanco)+')'
+    #print(s)
+
+    if game.turn == BLACK:
         inicio = time.time()
-        value, new_board = minimax_alpha_beta_prunning(game.get_board(), profundidadBlanco, float('-inf'), float('inf'), True, WHITE, WHITE, game)
-        game.ai_move(new_board)
-        tiempoTurno = time.time() - inicio
-        print("Turno del blanco : ",round(tiempoTurno,5), " segundos")
-    else:
-        inicio = time.time()
-        value2, new_board2 = minimax_alpha_beta_prunning(game.get_board(), profundidadNegro, float('-inf'), float('inf'), True, BLACK, BLACK, game)
+
+        value2, new_board2 = poda_1.minimax_alpha_beta_prunning(game.get_board(), profundidadNegro, float('-inf'), float('inf'), True, BLACK, BLACK, game)
         game.ai_move(new_board2)
+
         tiempoTurno = time.time() - inicio
-        print("Turno del negro : ", round(tiempoTurno,5), " segundos")
-
-
-def prunning_vs_minimax(game,profundidadNegro,profundidadBlanco):
-
-    s = 'Poda(' + str(profundidadNegro) + ') vs Min(' + str(profundidadBlanco) + ')'
-    print(s)
-
-    if game.turn == WHITE:
-        inicio = time.time()
-        value, new_board = minimax_alpha_beta_prunning(game.get_board(), profundidadBlanco, float('-inf'), float('inf'), True, WHITE, WHITE, game)
-        game.ai_move(new_board)
-        tiempoTurno= time.time() - inicio
-        print("Turno del blanco : ",round(tiempoTurno,5), " segundos")
-    else:
-        inicio = time.time()
-        value2, new_board2 = minimax(game.get_board(), profundidadNegro, True, BLACK, BLACK, game)
-        game.ai_move(new_board2)
-        tiempoTurno = time.time() - inicio
-        print("Turno del negro : ",round(tiempoTurno,5), " segundos")
-
-
-def minimax_vs_prunnig(game, profundidadNegro, profundidadBlanco):
-    s = 'Min(' + str(profundidadNegro) + ') vs Poda(' + str(profundidadBlanco) + ')'
-    print(s)
-
-    if game.turn == WHITE:
-
-        inicio = time.time()
-        value2, new_board2 = minimax(game.get_board(), profundidadBlanco, True, WHITE, WHITE, game)
-        game.ai_move(new_board2)
-        tiempoTurno = time.time() - inicio
-        print("Turno del negro : ", round(tiempoTurno, 5), " segundos")
+        #print("Turno del negro : ", round(tiempoTurno, 5), " segundos")
+        return BLACK, tiempoTurno
 
     else:
 
         inicio = time.time()
-        value, new_board = minimax_alpha_beta_prunning(game.get_board(), profundidadNegro, float('-inf'), float('inf'),True, BLACK, BLACK, game)
+
+        value, new_board = poda_2.minimax_alpha_beta_prunning(game.get_board(), profundidadBlanco, float('-inf'),
+                                                              float('inf'), True, WHITE, WHITE, game)
         game.ai_move(new_board)
         tiempoTurno = time.time() - inicio
-        print("Turno del blanco : ", round(tiempoTurno, 5), " segundos")
+        #print("Turno del blanco : ", round(tiempoTurno, 5), " segundos")
+        return WHITE, tiempoTurno
 
 
-def minimax_vs_minimax(game,profundidadBlanco,profundidadNegro):
 
-    s = 'Min(' + str(profundidadNegro) + ') vs Min(' + str(profundidadBlanco) + ')'
-    print(s)
 
-    if game.turn == WHITE:
+def prunning_vs_minimax(game,profundidadNegro,profundidadBlanco, poda, min):
+
+    #s = 'Poda(' + str(profundidadNegro) + ') vs Min(' + str(profundidadBlanco) + ')'
+    #print(s)
+
+    if game.turn == BLACK:
+
         inicio = time.time()
-        value, new_board = minimax(game.get_board(), profundidadBlanco, True, WHITE, WHITE, game)
-        game.ai_move(new_board)
-        tiempoTurno = time.time() - inicio
-        print("Turno del blanco : ",round(tiempoTurno,5), " segundos")
-    else:
-        inicio = time.time()
-        value2, new_board2 = minimax(game.get_board(), profundidadNegro, True, BLACK, BLACK, game)
+
+        value2, new_board2 = poda.minimax_alpha_beta_prunning(game.get_board(), profundidadNegro, float('-inf'), float('inf'), True, BLACK, BLACK, game)
         game.ai_move(new_board2)
+
         tiempoTurno = time.time() - inicio
-        print("Turno del negro : ",round(tiempoTurno,5), " segundos")
+        #print("Turno del negro : ", round(tiempoTurno, 5), " segundos")
+        return BLACK, tiempoTurno
+
+
+    else:
+
+        inicio = time.time()
+
+        value, new_board = min.minimax(game.get_board(), profundidadBlanco, True, WHITE, WHITE, game)
+        game.ai_move(new_board)
+
+        tiempoTurno = time.time() - inicio
+        #print("Turno del blanco : ", round(tiempoTurno, 5), " segundos")
+        return WHITE, tiempoTurno
+
+
+def minimax_vs_prunnig(game, profundidadNegro, profundidadBlanco, min, poda):
+    #s = 'Min(' + str(profundidadNegro) + ') vs Poda(' + str(profundidadBlanco) + ')'
+    #print(s)
+
+    if game.turn == BLACK:
+
+        inicio = time.time()
+
+        value2, new_board2 = min.minimax(game.get_board(), profundidadNegro, True, BLACK, BLACK, game)
+        game.ai_move(new_board2)
+
+        tiempoTurno = time.time() - inicio
+        #print("Turno del blanco : ", round(tiempoTurno, 5), " segundos")
+        return BLACK, tiempoTurno
+
+    else:
+
+        inicio = time.time()
+
+        value, new_board = poda.minimax_alpha_beta_prunning(game.get_board(), profundidadBlanco, float('-inf'), float('inf'), True, WHITE, WHITE, game)
+        game.ai_move(new_board)
+
+        tiempoTurno = time.time() - inicio
+        #print("Turno del negro : ", round(tiempoTurno, 5), " segundos")
+        return WHITE, tiempoTurno
+
+
+def minimax_vs_minimax(game,profundidadNegro, profundidadBlanco, min_1, min_2):
+
+    #s = 'Min(' + str(profundidadNegro) + ') vs Min(' + str(profundidadBlanco) + ')'
+    #print(s)
+
+    if game.turn == BLACK:
+
+        inicio = time.time()
+
+        value2, new_board2 = min_1.minimax(game.get_board(), profundidadNegro, True, BLACK, BLACK, game)
+        game.ai_move(new_board2)
+
+        tiempoTurno = time.time() - inicio
+        #print("Turno del negro : ", round(tiempoTurno, 5), " segundos")
+        return BLACK, tiempoTurno
+
+
+    else:
+
+        inicio = time.time()
+
+        value, new_board = min_2.minimax(game.get_board(), profundidadBlanco, True, WHITE, WHITE, game)
+        game.ai_move(new_board)
+
+        tiempoTurno = time.time() - inicio
+        #print("Turno del blanco : ", round(tiempoTurno, 5), " segundos")
+        return WHITE, tiempoTurno
+
+
+
+
+def print_nodos(black_player_nodes, white_player_nodes):
+
+    negro = "Nodos expandidos por el jugador negro: " + str(black_player_nodes)
+    blanco = "Nodos expandidos por el jugador blanco: " + str(white_player_nodes)
+
+    if black_player_nodes != 0:
+        print(negro)
+
+    if white_player_nodes != 0:
+        print(blanco)
 
 
 
@@ -175,7 +241,7 @@ def Menu():
     psg.theme('SystemDefault')
     # define layout
     layout = [[psg.Text('Elegir Algoritmo', size=(20, 1), font='Lucida', justification='left')],
-              [psg.Combo(['Minimax vs Minimax', 'Prunning vs Prunning', 'Minimax vs Prunnig'],default_value='', key='algoritmo')],
+              [psg.Combo(['Minimax vs Minimax', 'Poda vs Poda', 'Minimax vs Poda', 'Humano vs Poda'],default_value='', key='algoritmo')],
               [psg.Text('Elegir Profundidad Negro', size=(30, 1), font='Lucida', justification='left')],
               [psg.Combo( ['2','3','4','5','6'],key='profundidadNegro')],
               [psg.Text('Elegir Profundidad Blanco', size=(30, 1), font='Lucida', justification='left')],
@@ -191,7 +257,8 @@ def Menu():
             win.close()
             break
         else:
-            main(v['algoritmo'], int(v['profundidadNegro']), int(v['profundidadBlanco']))
+            if v['algoritmo'] == 'Humano vs Poda':
+                main(v['algoritmo'], 0, int(v['profundidadBlanco']))
+            else:
+                main(v['algoritmo'], int(v['profundidadNegro']), int(v['profundidadBlanco']))
             # psg.popup('' + v['algoritmo'] + ' : ' + v['profundidadNegro'] + ' ' + v['profundidadBlanco'])
-
-Menu()
